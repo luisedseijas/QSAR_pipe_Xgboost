@@ -48,7 +48,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PATHS = {
     'raw_data': os.path.join(BASE_DIR, 'data', 'raw', 'all_descriptor_results_1751.xlsx'),
     'optimized_data': os.path.join(BASE_DIR, 'data', 'processed', 'dataset_molecular_optimizado.xlsx'),
-    'drugbank_data': os.path.join(BASE_DIR, 'data', 'raw', 'new_compounds.xlsx'),
+    'new_compounds_data': os.path.join(BASE_DIR, 'data', 'raw', 'new_compounds.xlsx'),
     'model_dir': os.path.join(BASE_DIR, 'results', 'model_metadata'),
     'predictions_dir': os.path.join(BASE_DIR, 'results', 'predictions'),
     
@@ -149,7 +149,7 @@ def check_pipeline_state():
         state['step_2']['msg'] = f"Model ready ({model_name})."
 
     # 3. Prediction Status
-    has_db, db_time_str, db_ts = get_file_info(PATHS['drugbank_data'])
+    has_db, db_time_str, db_ts = get_file_info(PATHS['new_compounds_data'])
     
     state['step_3'] = {
         'name': "Prediction (New Compounds)",
@@ -181,7 +181,7 @@ def clear_screen():
 
 def print_header():
     title = Text("QSAR INTELLIGENT PIPELINE", justify="center", style="bold cyan")
-    subtitle = Text("Dataset Optimization • XGBoost Modeling • DrugBank Prediction", justify="center", style="dim white")
+    subtitle = Text("Dataset Optimization • XGBoost Modeling • New Compound Prediction", justify="center", style="dim white")
     console.print(Panel(title, subtitle=subtitle, border_style="cyan"))
 
 def print_status_table(state):
