@@ -1,0 +1,27 @@
+name: IC-50
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - jupyter
+  - notebook
+  - jupyterlab
+  - pandas
+  - numpy=1.26.4  # Compatible con RDKit 2023.09.1
+  - matplotlib
+  - seaborn
+  - scikit-learn
+  - statsmodels
+  - scipy
+  - xgboost
+  - lightgbm=4.4.0  # Versión compatible instalada
+  - plotly
+  - shap
+  - openpyxl
+  - xlrd
+  - rdkit=2023.09.1  # Versión específica estable y funcional
+  - sqlalchemy=2.0.43  # Para compatibilidad con bases de datos
+  - pip
+  - pip:
+    - ipykernel

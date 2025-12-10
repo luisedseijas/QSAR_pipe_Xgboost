@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Mac
+.DS_Store
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+
+# Large Results (Optional: Comment out if you want to track these)
+# results/predictions/
+# results/plots/
+# But we usually keep model metadata if small
