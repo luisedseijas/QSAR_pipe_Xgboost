@@ -53,9 +53,9 @@ PATHS = {
     'predictions_dir': os.path.join(BASE_DIR, 'results', 'predictions'),
     
     # Scripts
-    'script_opt': os.path.join(BASE_DIR, 'dataset_optimizer.py'),
-    'script_train': os.path.join(BASE_DIR, 'xgboost_optimizer.py'),
-    'script_pred': os.path.join(BASE_DIR, 'molecular_predictor.py'),
+    'script_opt': os.path.join(BASE_DIR, 'src', 'dataset_optimizer.py'),
+    'script_train': os.path.join(BASE_DIR, 'src', 'xgboost_optimizer.py'),
+    'script_pred': os.path.join(BASE_DIR, 'src', 'molecular_predictor.py'),
 }
 
 # ==============================================================================

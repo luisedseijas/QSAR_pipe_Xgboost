@@ -59,8 +59,10 @@ def tqdm_joblib(tqdm_object):
 # ==============================================================================
 # CONFIGURATION
 # ==============================================================================
-INPUT_FILE = os.path.join('data', 'processed', 'dataset_molecular_optimizado.xlsx')
-RESULTS_DIR = 'results'
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+INPUT_FILE = os.path.join(PROJECT_ROOT, 'data', 'processed', 'dataset_molecular_optimizado.xlsx')
+RESULTS_DIR = os.path.join(PROJECT_ROOT, 'results')
 METADATA_DIR = os.path.join(RESULTS_DIR, 'model_metadata')
 
 # Random state for reproducibility

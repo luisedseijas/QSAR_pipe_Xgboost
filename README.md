@@ -26,7 +26,7 @@ This will launch a menu where you can check the status of each step and run them
 ## 📂 Project Structure
 
 - **`pipeline_interface.py`**: **MAIN ENTRY POINT**. Manages the entire workflow.
-- **Scripts** (Managed by the interface):
+- **`src/`**: Contains the core logic scripts (managed by the interface).
     - `dataset_optimizer.py`: **Phase 1**. Preprocessing & feature selection.
     - `xgboost_optimizer.py`: **Phase 2**. Model training & optimization.
     - `molecular_predictor.py`: **Phase 3**. New compound prediction.
