@@ -7,7 +7,7 @@ A comprehensive Python pipeline for QSAR analysis and XGBoost model optimization
 - **Intelligent CLI**: A central `pipeline_interface.py` that manages the workflow and checks dependencies.
 - **Automated Data Pipeline**: From raw descriptors to optimized feature sets (`dataset_optimizer.py`).
 - **XGBoost Optimization**: Robust hyperparameter tuning with `GridSearchCV` (`xgboost_optimizer.py`).
-- **DrugBank Prediction**: Predicts pIC50 for new compounds using PCA-based Applicability Domain (`drugbank_predictor.py`).
+- **DrugBank Prediction**: Predicts pIC50 for new compounds using PCA-based Applicability Domain (`molecular_predictor.py`).
 - **Visualization**: Generates structure grid images and analysis plots.
 - **Artifact Management**: Automatically saves models, metadata, and results in a structured format.
 
@@ -29,7 +29,7 @@ This will launch a menu where you can check the status of each step and run them
 - **Scripts** (Managed by the interface):
     - `dataset_optimizer.py`: **Phase 1**. Preprocessing & feature selection.
     - `xgboost_optimizer.py`: **Phase 2**. Model training & optimization.
-    - `drugbank_predictor.py`: **Phase 3**. New compound prediction.
+    - `molecular_predictor.py`: **Phase 3**. New compound prediction.
 - **`data/`**:
     - **`raw/`**: Input Excel files.
     - **`processed/`**: Intermediate optimized datasets.

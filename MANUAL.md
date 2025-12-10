@@ -32,8 +32,8 @@ The interface shows you a status table with 3 steps:
 - **Output**: Saves the model to `results/model_metadata/` and validation plots to `results/`.
 - **Note**: This can take a few minutes depending on the settings.
 
-### Step 3: Prediction (`drugbank_predictor.py`)
-- **What it does**: Reads `data/raw/drugbank_compounds_cleaned.xlsx` and predicts pIC50 values using the *latest* trained model.
+### Step 3: Prediction (`molecular_predictor.py`)
+- **What it does**: Reads `data/raw/new_compounds.xlsx` and predicts pIC50 values using the *latest* trained model.
 - **Applicability Domain**: It checks if new compounds are "similar enough" to the training data. If a compound is too different (High Mahalanobis Distance), it is marked as "Out of Domain".
 - **Output**: Saves an Excel file with predictions to `results/predictions/` and images of the top candidates to `results/plots/`.
 
@@ -42,7 +42,7 @@ The interface shows you a status table with 3 steps:
 ### "File Not Found" Errors
 - Check `data/raw/`. You must have:
     - `all_descriptor_results_1751.xlsx` (for training phase)
-    - `drugbank_compounds_cleaned.xlsx` (for prediction phase)
+    - `new_compounds.xlsx` (for prediction phase)
 
 ### Environment Issues
 - The scripts are hardcoded to use `/Users/luisseijas/miniforge3/envs/IC-50/bin/python`.

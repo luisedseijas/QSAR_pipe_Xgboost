@@ -9,7 +9,7 @@ It manages dependencies, checks file status, and guides the user through the
 three-stage process:
 1. Dataset Optimization
 2. Model Training (XGBoost)
-3. Prediction (DrugBank)
+3. Prediction (New Compounds)
 
 Author: Antigravity (Google DeepMind)
 """
@@ -48,14 +48,14 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PATHS = {
     'raw_data': os.path.join(BASE_DIR, 'data', 'raw', 'all_descriptor_results_1751.xlsx'),
     'optimized_data': os.path.join(BASE_DIR, 'data', 'processed', 'dataset_molecular_optimizado.xlsx'),
-    'drugbank_data': os.path.join(BASE_DIR, 'data', 'raw', 'drugbank_compounds_cleaned.xlsx'),
+    'drugbank_data': os.path.join(BASE_DIR, 'data', 'raw', 'new_compounds.xlsx'),
     'model_dir': os.path.join(BASE_DIR, 'results', 'model_metadata'),
     'predictions_dir': os.path.join(BASE_DIR, 'results', 'predictions'),
     
     # Scripts
     'script_opt': os.path.join(BASE_DIR, 'dataset_optimizer.py'),
     'script_train': os.path.join(BASE_DIR, 'xgboost_optimizer.py'),
-    'script_pred': os.path.join(BASE_DIR, 'drugbank_predictor.py'),
+    'script_pred': os.path.join(BASE_DIR, 'molecular_predictor.py'),
 }
 
 # ==============================================================================
@@ -152,7 +152,7 @@ def check_pipeline_state():
     has_db, db_time_str, db_ts = get_file_info(PATHS['drugbank_data'])
     
     state['step_3'] = {
-        'name': "Prediction (DrugBank)",
+        'name': "Prediction (New Compounds)",
         'status': "UNKNOWN",
         'color': "white",
         'msg': ""
@@ -161,7 +161,7 @@ def check_pipeline_state():
     if not has_db:
         state['step_3']['status'] = "MISSING INPUT"
         state['step_3']['color'] = "red"
-        state['step_3']['msg'] = "DrugBank file not found."
+        state['step_3']['msg'] = "Input file 'new_compounds.xlsx' not found."
     elif not has_model:
         state['step_3']['status'] = "BLOCKED"
         state['step_3']['color'] = "dim white"
@@ -283,7 +283,7 @@ def main():
             if state['step_3']['status'] == "BLOCKED":
                 if not Confirm.ask("[yellow]Warning: Model is missing. Proceed anyway?[/yellow]"):
                     continue
-            run_script(PATHS['script_pred'], "DrugBank Prediction")
+            run_script(PATHS['script_pred'], "New Compounds Prediction")
             Prompt.ask("\n[dim]Press Enter to continue...[/]")
             
         elif choice.lower() == 'a':

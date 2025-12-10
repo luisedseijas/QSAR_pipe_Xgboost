@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 
 """
-DrugBank Predictor with PCA-based Applicability Domain
+Molecular Predictor with PCA-based Applicability Domain
 
-This script predicts pIC50 values for new compounds (specifically from DrugBank)
+This script predicts pIC50 values for new compounds
 using a pre-trained XGBoost model. It implements a rigorous Applicability Domain (AD)
 methodology based on Principal Component Analysis (PCA) and Mahalanobis distance.
 
 Methodology:
-1.  **Data Loading**: Loads training data (to define the domain) and new DrugBank data.
+1.  **Data Loading**: Loads training data (to define the domain) and new compounds data.
 2.  **Feature Alignment**: Ensures new data has the exact same features as the trained model.
 3.  **Preprocessing**: Scales data using RobustScaler (fitted on training data).
 4.  **Applicability Domain (New)**:
@@ -278,12 +278,12 @@ def calculate_descriptors(df, smiles_col='smiles'):
 
 
 
-def predict_drugbank_compounds():
+def predict_new_compounds():
     """
-    Main workflow function for DrugBank prediction.
+    Main workflow function for New Compounds prediction.
     """
     start_time = datetime.now()
-    logger.info("Starting DrugBank Prediction Pipeline...")
+    logger.info("Starting Molecular Prediction Pipeline...")
     
     # -------------------------------------------------------------------------
     # 1. Load Data
@@ -299,26 +299,26 @@ def predict_drugbank_compounds():
         
     df_train = load_data(train_file)
     
-    # DrugBank Data (New Compounds)
-    # Filename identified from notebook analysis
-    drugbank_file = "drugbank_compounds_cleaned.xlsx"
+    # New Compounds Data
+    # Filename generic
+    input_file = "new_compounds.xlsx"
     # We look for it in the Documents folder or current dir
-    drugbank_path = None
+    input_path = None
     possible_paths = [
-        os.path.join(DATA_DIR, "raw", drugbank_file),
-        os.path.join(BASE_DIR, drugbank_file),
-        "/Users/luisseijas/Documents/QSAR_Andres/" + drugbank_file
+        os.path.join(DATA_DIR, "raw", input_file),
+        os.path.join(BASE_DIR, input_file),
+        "/Users/luisseijas/Documents/QSAR_Andres/" + input_file
     ]
     
     for p in possible_paths:
         if os.path.exists(p):
-            drugbank_path = p
+            input_path = p
             break
             
-    if not drugbank_path:
-        raise FileNotFoundError(f"DrugBank input file '{drugbank_file}' not found in common locations.")
+    if not input_path:
+        raise FileNotFoundError(f"Input file '{input_file}' not found in common locations.")
         
-    df_new_raw = load_data(drugbank_path)
+    df_new_raw = load_data(input_path)
     
     # Calculate descriptors if they don't exist
     # Determine SMILES column
@@ -362,7 +362,7 @@ def predict_drugbank_compounds():
     if missing_features_new:
         # Check if we calculated descriptors but some are still missing (e.g. non-RDKit features used in training?)
         # For now, raise error to ensure strict matching as requested.
-        raise ValueError(f"DrugBank data missing required features used in training: {missing_features_new}")
+        raise ValueError(f"New data missing required features used in training: {missing_features_new}")
         
     # Extract Features
     X_train = df_train[selected_features]
@@ -470,7 +470,8 @@ def predict_drugbank_compounds():
     # 7. Saving Output
     # -------------------------------------------------------------------------
     timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_filename = f"drugbank_predictions_{timestamp_str}.xlsx"
+    timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_filename = f"predictions_{timestamp_str}.xlsx"
     output_path = os.path.join(PREDICTIONS_DIR, output_filename)
     
     logger.info(f"Saving results to {output_path}...")
@@ -494,7 +495,7 @@ def predict_drugbank_compounds():
     # Plot 1: Histogram of Predicted pIC50
     plt.figure(figsize=(10, 6))
     plt.hist(results_df['Predicted_pIC50'], bins=30, color='skyblue', edgecolor='black', alpha=0.7)
-    plt.title('Distribution of Predicted pIC50 Values (DrugBank)', fontsize=14)
+    plt.title('Distribution of Predicted pIC50 Values', fontsize=14)
     plt.xlabel('Predicted pIC50')
     plt.ylabel('Count')
     plt.grid(True, linestyle='--', alpha=0.5)
@@ -579,4 +580,4 @@ def predict_drugbank_compounds():
 
 
 if __name__ == "__main__":
-    predict_drugbank_compounds()
+    predict_new_compounds()

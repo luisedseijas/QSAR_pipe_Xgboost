@@ -17,6 +17,10 @@ ENV/
 .vscode/
 .idea/
 
+# Notebooks
+notebooks/
+*.ipynb
+
 # Large Results (Optional: Comment out if you want to track these)
 # results/predictions/
 # results/plots/
