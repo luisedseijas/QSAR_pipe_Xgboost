@@ -1,4 +1,4 @@
-# QSAR_Andres: Advanced QSAR & pIC50 Prediction Pipeline
+# Advanced QSAR & pIC50 Prediction Pipeline
 
 **A robust, automated Python pipeline for Quantitative Structure-Activity Relationship (QSAR) analysis and XGBoost model optimization.**
 
