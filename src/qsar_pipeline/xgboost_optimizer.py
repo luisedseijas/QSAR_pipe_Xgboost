@@ -12,7 +12,8 @@ The methodology follows 'XGBoost_Facil_2.ipynb' and includes:
 4.  Outlier Detection & Removal (Mahalanobis Distance & Leverage)
 5.  Refitting on Clean Data
 6.  Evaluation (OECD Domain Applicability, Williams Plot)
-7.  Artifact Saving (Models, Metadata, Plots)
+7.  Model Persistence (Models, Metadata, Plots)
+
 
 Author: Antigravity (Google DeepMind)
 Date: 2025-12-10
@@ -64,6 +65,8 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 INPUT_FILE = os.path.join(PROJECT_ROOT, 'data', 'processed', 'dataset_molecular_optimizado.xlsx')
 RESULTS_DIR = os.path.join(PROJECT_ROOT, 'results')
 METADATA_DIR = os.path.join(RESULTS_DIR, 'model_metadata')
+PLOTS_DIR = os.path.join(RESULTS_DIR, 'plots')
+
 
 # Random state for reproducibility
 RANDOM_STATE = 42
@@ -115,7 +118,7 @@ PARAM_GRID = {
 
 def setup_directories():
     """Creates necessary output directories if they don't exist."""
-    for directory in [RESULTS_DIR, METADATA_DIR]:
+    for directory in [RESULTS_DIR, METADATA_DIR, PLOTS_DIR]:
         if not os.path.exists(directory):
             os.makedirs(directory)
             print(f"Created directory: {directory}")
@@ -215,7 +218,7 @@ def plot_williams(leverage, residuals_std, h_crit, res_crit, set_name="Train", f
     plt.grid(True, alpha=0.3)
     
     if filename:
-        save_path = os.path.join(RESULTS_DIR, filename)
+        save_path = os.path.join(PLOTS_DIR, filename)
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
         plt.close()
         print(f"  ✓ Saved plot: {save_path}")
@@ -237,7 +240,7 @@ def plot_mahalanobis_williams(mahal_dist, residuals_std, mahal_crit, res_crit, s
     plt.grid(True, alpha=0.3)
     
     if filename:
-        save_path = os.path.join(RESULTS_DIR, filename)
+        save_path = os.path.join(PLOTS_DIR, filename)
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
         plt.close()
         print(f"  ✓ Saved plot: {save_path}")
@@ -258,7 +261,8 @@ def plot_pred_vs_real(y_true, y_pred, title, filename=None):
     plt.grid(True, alpha=0.3)
     
     if filename:
-        save_path = os.path.join(RESULTS_DIR, filename)
+        save_path = os.path.join(PLOTS_DIR, filename)
+
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
         plt.close()
         print(f"  ✓ Saved plot: {save_path}")
@@ -512,7 +516,7 @@ def main():
         "williams_plot_mahalanobis_train.png"
     )
     
-    # Save Artifacts
+    # Save Files
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     
     # Save Metadata JSON
@@ -550,7 +554,8 @@ def main():
     model_pkl_path = os.path.join(METADATA_DIR, f'modelo_completo_{timestamp}.pkl')
     joblib.dump(final_model, model_pkl_path)
     
-    print("\nSaved Artifacts:")
+    print("\nSaved Files:")
+
     print(f"  - Metadata: {metadata_path}")
     print(f"  - Covariance: {cov_path}")
     print(f"  - Model (JSON): {model_json_path}")
