@@ -93,6 +93,8 @@ PARAM_GRID = {
     'reg_alpha': [0.01, 0.1],               # Regularización L1 (produce features sparse)
     'reg_lambda': [1, 5]                    # Regularización L2 (reduce pesos)
 }
+# PARAM_GRID = {'n_estimators': [10], 'max_depth': [3]} # Fast test
+
 
 # Fast Grid for Verification (Best Params from previous run)
 # PARAM_GRID = {
@@ -470,11 +472,11 @@ def main():
     
     mask_notebook_replication = (mahal_test_clean_metric <= mahal_crit) & (np.abs(std_res_test) <= 3.0)
     
-    print(f"\nTest samples in domain (Notebook Replication - Structural + Residual Filter): {np.sum(mask_notebook_replication)} / {len(y_test)}")
+    print(f"\nTest samples in domain (Structural + Residual Filter): {np.sum(mask_notebook_replication)} / {len(y_test)}")
     if np.sum(mask_notebook_replication) > 0:
         y_test_nb = y_test[mask_notebook_replication]
         y_test_pred_nb = y_test_pred[mask_notebook_replication]
-        metrics_test_notebook = evaluate_metrics(y_test_nb, y_test_pred_nb, "Test (Notebook Logic - Inflated)")
+        metrics_test_notebook = evaluate_metrics(y_test_nb, y_test_pred_nb, "Test (Structural + Residual Filter)")
 
     # 8. Visualization & Saving
     print("\n" + "-" * 40)
@@ -489,6 +491,12 @@ def main():
     plot_pred_vs_real(y_test, y_test_pred, 
                       f"Test (All) - R2={metrics_test['r2']:.3f}", 
                       "pred_vs_real_test.png")
+    
+    if np.sum(mask_notebook_replication) > 0:
+        plot_pred_vs_real(y_test[mask_notebook_replication], 
+                          y_test_pred[mask_notebook_replication],
+                          f"Test (Filtered) - R2={metrics_test_notebook['r2']:.3f}",
+                          "pred_vs_real_test_filtered.png")
     
     # Standardized Residuals
     std_res_train = (y_train_clean - y_train_pred) / np.std(y_train_clean - y_train_pred)
