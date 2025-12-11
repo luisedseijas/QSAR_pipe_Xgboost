@@ -45,7 +45,8 @@ The pipeline is divided into three distinct phases, ensuring scientific rigor at
     - `learning_rate` (Step size)
     - `subsample` (Fraction of samples used per tree)
 3.  **Validation**: Evaluates the best model using $R^2$ (Coefficient of Determination) and RMSE (Root Mean Squared Error).
-4.  **Artifact Saving**: Saves the trained model (`.json`) and specific scalers (for standardization) to `results/model_metadata/`.
+4.  **Model Persistence**: Saves the trained model (`.json`) and specific scalers (for standardization) to `results/model_metadata/`.
+
 
 ### Phase 3: Prediction & Applicability Domain (`molecular_predictor.py`)
 **Goal**: Screen new compounds and assess prediction reliability.
