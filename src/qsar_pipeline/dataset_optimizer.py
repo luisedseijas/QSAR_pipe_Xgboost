@@ -60,15 +60,16 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR)) # src/qsar_pipeline 
 INPUT_FILENAME = os.path.join(PROJECT_ROOT, 'data', 'raw', 'all_descriptor_results_1751.xlsx')
 DATA_DIR = os.path.join(PROJECT_ROOT, 'data', 'processed')
 RESULTS_DIR = os.path.join(PROJECT_ROOT, 'results')
+PLOTS_DIR = os.path.join(RESULTS_DIR, 'plots')
 OUTPUT_FILENAME = os.path.join(DATA_DIR, 'dataset_molecular_optimizado.xlsx')
 
 
 def setup_directories():
     """
     Ensure that the necessary output directories exist.
-    Creates 'data/' and 'results/' if they do not exist.
+    Creates 'data/', 'results/', and 'results/plots/' if they do not exist.
     """
-    for directory in [DATA_DIR, RESULTS_DIR]:
+    for directory in [DATA_DIR, RESULTS_DIR, PLOTS_DIR]:
         if not os.path.exists(directory):
             os.makedirs(directory)
             print(f"Created directory: {directory}/")
@@ -279,7 +280,7 @@ def comprehensive_dataset_analysis_and_optimization(df):
     print(f"   3xIQR Bounds: {lower_bound_3:.2f} - {upper_bound_3:.2f}")
     
     # Generate initial plots
-    create_initial_distribution_analysis(df, ic50_stats)
+    create_initial_distribution_analysis(df, ic50_stats, output_dir=PLOTS_DIR)
 
     # ========================================================================
     # PHASE 2: OUTLIER REMOVAL (ROBUST STATISTICAL CRITERIA)
@@ -438,7 +439,7 @@ def comprehensive_dataset_analysis_and_optimization(df):
     # PHASE 4: COMPARATIVE ANALYSIS
     # ========================================================================
     # (Visualizations generated in separate function)
-    create_detailed_plots(df, df_optimized)
+    create_detailed_plots(df, df_optimized, output_dir=PLOTS_DIR)
 
     # ========================================================================
     # PHASE 5: SAVE RESULTS
