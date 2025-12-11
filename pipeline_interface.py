@@ -303,9 +303,10 @@ def get_step_2_grid_config():
             return []
             
     elif choice == '3':
-        custom_path = os.path.join(BASE_DIR, 'src', 'qsar_pipeline', 'grid_config.json')
+        custom_path = os.path.join(BASE_DIR, 'grid_config.json')
         if not os.path.exists(custom_path):
-            console.print(f"[red]Error: Custom file not found at {custom_path}. Using Default.[/]")
+            console.print(f"[red]Error: Custom file not found at {custom_path}.[/]")
+            console.print("[yellow]Please create 'grid_config.json' in the project root folder.[/]")
             return []
         return ['--config', custom_path]
         
