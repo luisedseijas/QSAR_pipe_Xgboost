@@ -500,7 +500,7 @@ def predict_new_compounds():
     plt.xlabel('Predicted pIC50')
     plt.ylabel('Count')
     plt.grid(True, linestyle='--', alpha=0.5)
-    plt.savefig(os.path.join(PLOTS_DIR, f"distribucion_predicciones_{timestamp_str}.png"))
+    plt.savefig(os.path.join(PLOTS_DIR, f"step_3_distribucion_predicciones_{timestamp_str}.png"))
     plt.close()
     
     # Plot 2: Mahalanobis Distance vs pIC50 (AD Plot)
@@ -528,7 +528,7 @@ def predict_new_compounds():
     plt.ylabel('Predicted pIC50')
     plt.legend()
     plt.grid(True, linestyle=':', alpha=0.5)
-    plt.savefig(os.path.join(PLOTS_DIR, f"dominio_aplicabilidad_pca_{timestamp_str}.png"))
+    plt.savefig(os.path.join(PLOTS_DIR, f"step_3_dominio_aplicabilidad_pca_{timestamp_str}.png"))
     plt.close()
     
     # Plot 3: Top 200 Candidates Grid Visualization
@@ -568,7 +568,7 @@ def predict_new_compounds():
             
             # Save
             part_num = (i // chunk_size) + 1
-            img_path = os.path.join(PLOTS_DIR, f"top_candidatos_part{part_num}_{timestamp_str}.png")
+            img_path = os.path.join(PLOTS_DIR, f"step_3_top_candidatos_part{part_num}_{timestamp_str}.png")
             img.save(img_path)
             logger.info(f"Saved visual report part {part_num}: {img_path}")
             

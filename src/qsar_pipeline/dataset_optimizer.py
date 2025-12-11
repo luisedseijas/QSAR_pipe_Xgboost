@@ -138,7 +138,7 @@ def create_initial_distribution_analysis(df, stats, output_dir=RESULTS_DIR):
     ax2.set_title('Boxplot de IC50 (Detección de Outliers)', fontsize=12)
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, '1_distribucion_original_ic50.png'), dpi=300)
+    plt.savefig(os.path.join(output_dir, 'step_1_1_distribucion_original_ic50.png'), dpi=300)
     plt.close()
     
     # 2. Log-scale Distribution (to show the need for transformation)
@@ -153,7 +153,7 @@ def create_initial_distribution_analysis(df, stats, output_dir=RESULTS_DIR):
     plt.ylabel('Frecuencia')
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, '2_distribucion_log_ic50.png'), dpi=300)
+    plt.savefig(os.path.join(output_dir, 'step_1_2_distribucion_log_ic50.png'), dpi=300)
     plt.close()
     
     print("Initial plots saved.")
@@ -185,7 +185,7 @@ def create_detailed_plots(df_original, df_optimized, output_dir=RESULTS_DIR):
     ax2.set_xlabel('pIC50')
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, '3_comparacion_distribuciones.png'), dpi=300)
+    plt.savefig(os.path.join(output_dir, 'step_1_3_comparacion_distribuciones.png'), dpi=300)
     plt.close()
     
     # 2. Boxplot Comparison by Species
@@ -204,7 +204,7 @@ def create_detailed_plots(df_original, df_optimized, output_dir=RESULTS_DIR):
         ax2.set_ylabel('pIC50')
         
         plt.tight_layout()
-        plt.savefig(os.path.join(output_dir, '4_comparacion_especies.png'), dpi=300)
+        plt.savefig(os.path.join(output_dir, 'step_1_4_comparacion_especies.png'), dpi=300)
         plt.close()
     
     # 3. Correlation Heatmap of Top Features
@@ -228,7 +228,7 @@ def create_detailed_plots(df_original, df_optimized, output_dir=RESULTS_DIR):
     
     plt.title('Matriz de Correlación (Top Características)', fontsize=14, fontweight='bold')
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, '5_matriz_correlacion.png'), dpi=300)
+    plt.savefig(os.path.join(output_dir, 'step_1_5_matriz_correlacion.png'), dpi=300)
     plt.close()
     
     print("Comparative plots saved.")

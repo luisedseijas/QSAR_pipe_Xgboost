@@ -490,17 +490,17 @@ def main():
     # Generate Plots
     plot_pred_vs_real(y_train_clean, y_train_pred, 
                       f"Train (Clean) - R2={metrics_train['r2']:.3f}", 
-                      "pred_vs_real_train.png")
+                      "step_2_pred_vs_real_train.png")
     
     plot_pred_vs_real(y_test, y_test_pred, 
                       f"Test (All) - R2={metrics_test['r2']:.3f}", 
-                      "pred_vs_real_test.png")
+                      "step_2_pred_vs_real_test.png")
     
     if np.sum(mask_notebook_replication) > 0:
         plot_pred_vs_real(y_test[mask_notebook_replication], 
                           y_test_pred[mask_notebook_replication],
                           f"Test (Filtered) - R2={metrics_test_notebook['r2']:.3f}",
-                          "pred_vs_real_test_filtered.png")
+                          "step_2_pred_vs_real_test_filtered.png")
     
     # Standardized Residuals
     std_res_train = (y_train_clean - y_train_pred) / np.std(y_train_clean - y_train_pred)
@@ -513,7 +513,7 @@ def main():
         mahal_crit,
         3.0, # Residual limit 3 sigma
         "Clean Train",
-        "williams_plot_mahalanobis_train.png"
+        "step_2_williams_plot_mahalanobis_train.png"
     )
     
     # Save Files
