@@ -45,11 +45,13 @@ The interface shows you a status table with 3 steps:
     - `new_compounds.xlsx` (for prediction phase)
 
 ### Environment Issues
-- The scripts are hardcoded to use `/Users/luisseijas/miniforge3/envs/IC-50/bin/python`.
-- If you move the project or change computers, you may need to update the top line (shebang) of the `.py` files or simply run them with `python script_name.py` after activating your own environment.
+- The script uses the python environment it is run in.
+- Best practice is to create a fresh conda environment:
+  ```bash
+  conda create -n qsar_env python=3.10
+  conda activate qsar_env
+  pip install -e .
+  ```
 
 ### Dependencies
-- If the interface doesn't start, ensure `rich` is installed:
-  ```bash
-  /Users/luisseijas/miniforge3/envs/IC-50/bin/pip install rich
-  ```
+- Most dependencies (like `pandas`, `xgboost`, `rich`, `tqdm`) are automatically installed when you run `pip install -e .`.

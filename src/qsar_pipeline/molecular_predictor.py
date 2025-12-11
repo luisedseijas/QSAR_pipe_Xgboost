@@ -68,7 +68,7 @@ AD_CONFIDENCE_LEVEL = 0.95     # Confidence level for AD threshold (Chi-square)
 
 # Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(BASE_DIR)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR))
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")
 RESULTS_DIR = os.path.join(PROJECT_ROOT, "results")
 MODEL_DIR = os.path.join(RESULTS_DIR, "model_metadata")

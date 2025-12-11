@@ -13,9 +13,18 @@ A comprehensive Python pipeline for QSAR analysis and XGBoost model optimization
 
 ## 🛠️ Quick Start
 
-This project is configured to run in the `IC-50` conda environment.
+**1. Create and Activate Environment**
+```bash
+conda create -n qsar_env python=3.10
+conda activate qsar_env
+```
 
-**Run the pipeline interface:**
+**2. Install the Package**
+```bash
+pip install -e .
+```
+
+**3. Run the pipeline interface:**
 ```bash
 ./pipeline_interface.py
 ```
@@ -26,7 +35,7 @@ This will launch a menu where you can check the status of each step and run them
 ## 📂 Project Structure
 
 - **`pipeline_interface.py`**: **MAIN ENTRY POINT**. Manages the entire workflow.
-- **`src/`**: Contains the core logic scripts (managed by the interface).
+- **`src/qsar_pipeline/`**: Python package containing core logic.
     - `dataset_optimizer.py`: **Phase 1**. Preprocessing & feature selection.
     - `xgboost_optimizer.py`: **Phase 2**. Model training & optimization.
     - `molecular_predictor.py`: **Phase 3**. New compound prediction.
@@ -35,3 +44,4 @@ This will launch a menu where you can check the status of each step and run them
     - **`processed/`**: Intermediate optimized datasets.
 - **`results/`**: Output directory for models, plots, and predictions.
 - **`MANUAL.md`**: Detailed user manual and troubleshooting guide.
+

@@ -56,7 +56,7 @@ sns.set_context("paper", font_scale=1.2)
 
 # Constants
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR)) # src/qsar_pipeline -> src -> root
 INPUT_FILENAME = os.path.join(PROJECT_ROOT, 'data', 'raw', 'all_descriptor_results_1751.xlsx')
 DATA_DIR = os.path.join(PROJECT_ROOT, 'data', 'processed')
 RESULTS_DIR = os.path.join(PROJECT_ROOT, 'results')

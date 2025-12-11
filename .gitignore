@@ -25,3 +25,8 @@ notebooks/
 # results/predictions/
 # results/plots/
 # But we usually keep model metadata if small
+
+# Packaging
+build/
+dist/
+*.egg-info/

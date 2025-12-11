@@ -1,4 +1,5 @@
-#!/Users/luisseijas/miniforge3/envs/IC-50/bin/python
+#!/usr/bin/env python
+
 # -*- coding: utf-8 -*-
 
 """
@@ -53,9 +54,9 @@ PATHS = {
     'predictions_dir': os.path.join(BASE_DIR, 'results', 'predictions'),
     
     # Scripts
-    'script_opt': os.path.join(BASE_DIR, 'src', 'dataset_optimizer.py'),
-    'script_train': os.path.join(BASE_DIR, 'src', 'xgboost_optimizer.py'),
-    'script_pred': os.path.join(BASE_DIR, 'src', 'molecular_predictor.py'),
+    'script_opt': os.path.join(BASE_DIR, 'src', 'qsar_pipeline', 'dataset_optimizer.py'),
+    'script_train': os.path.join(BASE_DIR, 'src', 'qsar_pipeline', 'xgboost_optimizer.py'),
+    'script_pred': os.path.join(BASE_DIR, 'src', 'qsar_pipeline', 'molecular_predictor.py'),
 }
 
 # ==============================================================================
