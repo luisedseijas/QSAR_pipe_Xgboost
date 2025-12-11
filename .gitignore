@@ -30,3 +30,5 @@ notebooks/
 build/
 dist/
 *.egg-info/
+grid_config.json
+fast_grid_temp.json
