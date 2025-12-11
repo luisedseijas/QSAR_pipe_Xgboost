@@ -99,3 +99,7 @@ For a detailed step-by-step guide on how to operate the menu and troubleshoot is
 ---
 
 **Authors**: QSAR_Andres Team
+
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
