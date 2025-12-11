@@ -31,9 +31,41 @@ The interface shows you a detailed status table with 4 columns:
 - **When to run**: When you have new raw training data or want to reset the dataset.
 
 ### Step 2: Model Training (`xgboost_optimizer.py`)
-- **What it does**: Uses the optimized data to train an XGBoost model. It searches for the best "hyperparameters" (settings) to make the model accurate.
-- **Output**: Saves the model to `results/model_metadata/` and validation plots to `results/`.
+- **Action**: Trains the XGBoost model using the optimized dataset.
+- **Grid Search Configuration**: 
+    - When selecting Step 2, you will be prompted to choose a Grid Search mode:
+        1. **Default (Exhaustive)**: Uses a large hyperparameter grid. Recommended for final models (Time Consuming).
+        2. **Fast (Verification)**: Uses a minimal grid. Recommended for quick testing or debugging.
+        3. **Custom (File)**: Loads parameters from `grid_config.json` in the project root directory.
+- **Process**:
+  1. Loads optimized data.
+  2. It searches for the best "hyperparameters" (settings) to make the model accurate.
 - **Note**: This can take a few minutes depending on the settings.
+
+### Output Files
+All results are saved in the `results/` directory:
+
+- **`results/model_metadata/`**:
+  - `modelo_xgboost_YYYYMMDD_HHMMSS.json`: Trained model file.
+  - `metadatos_modelo_YYYYMMDD_HHMMSS.json`: Metrics and parameters.
+  
+- **`results/plots/`**:
+  - **Step 1**:
+      - `step_1_1_distribucion_original_ic50.png`
+      - `step_1_2_distribucion_log_ic50.png`
+      - `step_1_3_comparacion_distribuciones.png`
+      - `step_1_5_matriz_correlacion.png`
+  - **Step 2**:
+      - `step_2_pred_vs_real_train.png`
+      - `step_2_pred_vs_real_test.png` (All test points)
+      - `step_2_pred_vs_real_test_filtered.png` (Filtered by applicability domain)
+      - `step_2_williams_plot_mahalanobis_train.png`
+  - **Step 3**:
+      - `step_3_distribucion_predicciones_*.png`
+      - `step_3_dominio_aplicabilidad_pca_*.png`
+
+- **`results/predictions/`**:
+  - `predictions_YYYYMMDD_HHMMSS.xlsx`: Excel file with predictions.
 
 ### Step 3: Prediction (`molecular_predictor.py`)
 - **What it does**: Reads `data/raw/new_compounds.xlsx` and predicts pIC50 values using the *latest* trained model.

@@ -88,8 +88,9 @@ Launch the interactive dashboard:
     - `raw/`: Place your `all_descriptor_results_1751.xlsx` and `new_compounds.xlsx` here.
     - `processed/`: Optimized datasets are saved here.
 - **`results/`**: 
-    - `model_metadata/`: Trained XGBoost models and JSON metadata.
-    - `predictions/`: Excel files with pIC50 predictions and AD flags.
+    - **Step 2 (Train)**: Trains the XGBoost model. 
+     - *Interactive Options*: Choose between **Default** (Exhaustive), **Fast** (Test), or **Custom** (load from `grid_config.json` in root) grid search.
+   - **Step 3 (Predict)**: Predicts pIC50 for new molecules. with pIC50 predictions and AD flags.
     - `plots/`: Performance comparisons and structure grids.
 
 ---
