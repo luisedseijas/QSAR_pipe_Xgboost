@@ -36,7 +36,15 @@ The interface shows you a detailed status table with 4 columns:
     - When selecting Step 2, you will be prompted to choose a Grid Search mode:
         1. **Default (Exhaustive)**: Uses a large hyperparameter grid. Recommended for final models (Time Consuming).
         2. **Fast (Verification)**: Uses a minimal grid. Recommended for quick testing or debugging.
-        3. **Custom (File)**: Loads parameters from `grid_config.json` in the project root directory.
+        3. **Custom (File)**: Loads parameters from a file named `grid_config.json` which **must be located in the project root directory**.
+           - **Example `grid_config.json`**:
+             ```json
+             {
+                 "n_estimators": [100, 200],
+                 "max_depth": [3, 5],
+                 "learning_rate": [0.05, 0.1]
+             }
+             ```
 - **Process**:
   1. Loads optimized data.
   2. It searches for the best "hyperparameters" (settings) to make the model accurate.
