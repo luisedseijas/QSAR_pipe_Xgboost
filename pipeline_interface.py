@@ -94,12 +94,19 @@ def check_pipeline_state():
     """
     state = {}
     
+    # helper for relative paths
+    def rel(path): 
+        return os.path.relpath(path, BASE_DIR)
+
     # 1. Dataset Optimization Status
     has_raw, raw_time_str, raw_ts = get_file_info(PATHS['raw_data'])
     has_opt, opt_time_str, opt_ts = get_file_info(PATHS['optimized_data'])
     
     state['step_1'] = {
-        'name': "Dataset Optimization",
+        'name': "1. Dataset Optimization",
+        'desc': "Cleans raw data, removes outliers, and selects best features.",
+        'inputs': [f"📥 {rel(PATHS['raw_data'])}"],
+        'outputs': [f"📤 {rel(PATHS['optimized_data'])}"],
         'status': "UNKNOWN",
         'color': "white",
         'msg': ""
@@ -108,25 +115,28 @@ def check_pipeline_state():
     if not has_raw:
         state['step_1']['status'] = "MISSING INPUT"
         state['step_1']['color'] = "red"
-        state['step_1']['msg'] = "Raw file 'all_descriptor_results_1751.xlsx' not found."
+        state['step_1']['msg'] = "Raw file not found."
     elif not has_opt:
         state['step_1']['status'] = "READY TO START"
         state['step_1']['color'] = "yellow"
-        state['step_1']['msg'] = "Raw data available. Optimization needed."
+        state['step_1']['msg'] = "Ready to optimize."
     elif raw_ts > opt_ts:
         state['step_1']['status'] = "OUTDATED"
         state['step_1']['color'] = "orange1"
-        state['step_1']['msg'] = "Raw data is newer than optimized data."
+        state['step_1']['msg'] = "Raw data newer than optimized."
     else:
         state['step_1']['status'] = "COMPLETED"
         state['step_1']['color'] = "green"
-        state['step_1']['msg'] = f"Optimized data ready ({opt_time_str})."
+        state['step_1']['msg'] = f"Last run: {opt_time_str}"
 
     # 2. Model Training Status
     has_model, model_name, model_ts = get_latest_model_info()
     
     state['step_2'] = {
-        'name': "Model Training",
+        'name': "2. Model Training",
+        'desc': "Trains XGBoost model with hyperparameter tuning.",
+        'inputs': [f"📥 {rel(PATHS['optimized_data'])}"],
+        'outputs': [f"📤 results/model_metadata/*.json"],
         'status': "UNKNOWN",
         'color': "white",
         'msg': ""
@@ -135,25 +145,28 @@ def check_pipeline_state():
     if not has_opt:
         state['step_2']['status'] = "BLOCKED"
         state['step_2']['color'] = "dim white"
-        state['step_2']['msg'] = "Waiting for optimized dataset."
+        state['step_2']['msg'] = "Waiting for Step 1."
     elif not has_model:
         state['step_2']['status'] = "READY TO START"
         state['step_2']['color'] = "yellow"
-        state['step_2']['msg'] = "Dataset ready. No model trained yet."
+        state['step_2']['msg'] = "Ready to train."
     elif opt_ts > model_ts:
         state['step_2']['status'] = "OUTDATED"
         state['step_2']['color'] = "orange1"
-        state['step_2']['msg'] = "Dataset changed since last training."
+        state['step_2']['msg'] = "Data changed, re-train suggested."
     else:
         state['step_2']['status'] = "COMPLETED"
         state['step_2']['color'] = "green"
-        state['step_2']['msg'] = f"Model ready ({model_name})."
+        state['step_2']['msg'] = f"Model: {model_name}"
 
     # 3. Prediction Status
     has_db, db_time_str, db_ts = get_file_info(PATHS['new_compounds_data'])
     
     state['step_3'] = {
-        'name': "Prediction (New Compounds)",
+        'name': "3. Prediction",
+        'desc': "Predicts pIC50 for new compounds.",
+        'inputs': [f"📥 {rel(PATHS['new_compounds_data'])}", "📥 Trained Model"],
+        'outputs': [f"📤 results/predictions/"],
         'status': "UNKNOWN",
         'color': "white",
         'msg': ""
@@ -162,15 +175,15 @@ def check_pipeline_state():
     if not has_db:
         state['step_3']['status'] = "MISSING INPUT"
         state['step_3']['color'] = "red"
-        state['step_3']['msg'] = "Input file 'new_compounds.xlsx' not found."
+        state['step_3']['msg'] = "Input file not found."
     elif not has_model:
         state['step_3']['status'] = "BLOCKED"
         state['step_3']['color'] = "dim white"
-        state['step_3']['msg'] = "Waiting for trained model."
+        state['step_3']['msg'] = "Waiting for Step 2."
     else:
         state['step_3']['status'] = "READY"
         state['step_3']['color'] = "cyan"
-        state['step_3']['msg'] = "Ready to generate predictions."
+        state['step_3']['msg'] = "Ready to predict."
         
     return state
 
@@ -186,27 +199,28 @@ def print_header():
     console.print(Panel(title, subtitle=subtitle, border_style="cyan"))
 
 def print_status_table(state):
-    table = Table(title="Pipeline State", expand=True, border_style="dim")
+    table = Table(title="Pipeline State", expand=True, border_style="dim", padding=(0,1))
     
-    table.add_column("Step", style="bold")
-    table.add_column("Current Status", justify="center")
-    table.add_column("Details")
+    table.add_column("Step", style="bold cyan", no_wrap=True)
+    table.add_column("Description", style="dim")
+    table.add_column("Input / Output", style="white")
+    table.add_column("Status", justify="center")
     
-    table.add_row(
-        "1. Optimize Data", 
-        f"[{state['step_1']['color']}]{state['step_1']['status']}[/]", 
-        state['step_1']['msg']
-    )
-    table.add_row(
-        "2. Train Model", 
-        f"[{state['step_2']['color']}]{state['step_2']['status']}[/]", 
-        state['step_2']['msg']
-    )
-    table.add_row(
-        "3. Predict", 
-        f"[{state['step_3']['color']}]{state['step_3']['status']}[/]", 
-        state['step_3']['msg']
-    )
+    for step_key in ['step_1', 'step_2', 'step_3']:
+        s = state[step_key]
+        
+        # Format IO
+        io_text = "\n".join(s['inputs'] + s['outputs'])
+        
+        # Format Status
+        status_text = f"[{s['color']}]{s['status']}[/]\n[dim]{s['msg']}[/]"
+        
+        table.add_row(
+            s['name'],
+            s['desc'],
+            io_text,
+            status_text
+        )
     
     console.print(table)
 
