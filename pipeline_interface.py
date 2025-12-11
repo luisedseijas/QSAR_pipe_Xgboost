@@ -253,7 +253,7 @@ def run_script(script_path_or_cmd, description):
     
     console.rule(f"[bold cyan]Executing: {description}[/]")
     
-    console.rule(f"[bold cyan]Executing: {description}[/]")
+
     
     
     # Handle list of arguments (script path + args) - ALREADY DONE ABOVE
