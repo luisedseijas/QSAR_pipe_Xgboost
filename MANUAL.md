@@ -37,12 +37,18 @@ The interface shows you a detailed status table with 4 columns:
         1. **Default (Exhaustive)**: Uses a large hyperparameter grid. Recommended for final models (Time Consuming).
         2. **Fast (Verification)**: Uses a minimal grid. Recommended for quick testing or debugging.
         3. **Custom (File)**: Loads parameters from a file named `grid_config.json` which **must be located in the project root directory**.
-           - **Example `grid_config.json`**:
+           - **Example `grid_config.json`** (Using available XGBoost hyperparameters):
              ```json
              {
-                 "n_estimators": [100, 200],
-                 "max_depth": [3, 5],
-                 "learning_rate": [0.05, 0.1]
+                 "n_estimators": [150, 250, 350],
+                 "learning_rate": [0.03, 0.05],
+                 "max_depth": [4, 5],
+                 "min_child_weight": [1, 5],
+                 "subsample": [0.7, 0.8],
+                 "colsample_bytree": [0.7, 0.8],
+                 "gamma": [0.0, 0.1, 0.5],
+                 "reg_alpha": [0.01, 0.1],
+                 "reg_lambda": [1, 5]
              }
              ```
 - **Process**:
