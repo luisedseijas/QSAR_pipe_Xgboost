@@ -26,6 +26,7 @@ import json
 import time
 import joblib
 import warnings
+import argparse
 from datetime import datetime
 from contextlib import contextmanager
 
@@ -73,44 +74,25 @@ RANDOM_STATE = 42
 
 # Grid Search Hyperparameter Space
 # (Reduced for demonstration/verification purposes. Expand lists for full optimization.)
-# PARAM_GRID = {
-#     'n_estimators': [100, 150, 200, 250, 300, 350],
-#     'learning_rate': [0.01, 0.05, 0.1],
-#     'max_depth': [3, 4, 5, 6],
-#     'gamma': [0.0, 0.1, 0.2, 0.5],
-#     'colsample_bytree': [0.7, 0.8],
-#     'min_child_weight': [1, 5],
-#     'reg_alpha': [0.01, 0.1, 1],
-#     'reg_lambda': [1, 5],
-#     'subsample': [0.7, 0.8]
-# }
 
-PARAM_GRID = {
-    'n_estimators': [150, 250, 350],        # Número de árboles (más árboles = modelo más complejo)
-    'learning_rate': [0.03, 0.05],          # Tasa de aprendizaje (menor = aprendizaje más lento pero estable)
-    'max_depth': [4, 5],                    # Profundidad máxima de árboles (controla complejidad)
-    'min_child_weight': [1, 5],             # Peso mínimo en nodos hijo (previene overfitting)
-    'subsample': [0.7, 0.8],                # Fracción de muestras usadas por árbol (previene overfitting)
-    'colsample_bytree': [0.7, 0.8],         # Fracción de features usadas por árbol
-    'gamma': [0.0, 0.1, 0.5],               # Reducción mínima de pérdida para hacer split (regularización)
-    'reg_alpha': [0.01, 0.1],               # Regularización L1 (produce features sparse)
-    'reg_lambda': [1, 5]                    # Regularización L2 (reduce pesos)
+# Default Grid Search Hyperparameter Space (Exhaustive)
+DEFAULT_PARAM_GRID = {
+    'n_estimators': [150, 250, 350],
+    'learning_rate': [0.03, 0.05],
+    'max_depth': [4, 5],
+    'min_child_weight': [1, 5],
+    'subsample': [0.7, 0.8],
+    'colsample_bytree': [0.7, 0.8],
+    'gamma': [0.0, 0.1, 0.5],
+    'reg_alpha': [0.01, 0.1],
+    'reg_lambda': [1, 5]
 }
-# PARAM_GRID = {'n_estimators': [10], 'max_depth': [3]} # Fast test
 
-
-# Fast Grid for Verification (Best Params from previous run)
-# PARAM_GRID = {
-#     'n_estimators': [350],
-#     'learning_rate': [0.05],
-#     'max_depth': [5],
-#     'gamma': [0.5],
-#     'colsample_bytree': [0.7],
-#     'min_child_weight': [1],
-#     'reg_alpha': [0.1], 
-#     'reg_lambda': [1],
-#     'subsample': [0.7]
-# }
+# Fast Grid for Verification/Testing
+FAST_PARAM_GRID = {
+    'n_estimators': [10], 
+    'max_depth': [3]
+}
 
 # ==============================================================================
 # UTILITY FUNCTIONS
@@ -267,6 +249,17 @@ def plot_pred_vs_real(y_true, y_pred, title, filename=None):
         plt.close()
         print(f"  ✓ Saved plot: {save_path}")
 
+        print(f"  ✓ Saved plot: {save_path}")
+
+def load_grid_config(config_path):
+    """Loads grid search configuration from a JSON file."""
+    try:
+        with open(config_path, 'r') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error loading config file {config_path}: {e}")
+        sys.exit(1)
+
 # ==============================================================================
 # MAIN PIPELINE
 # ==============================================================================
@@ -277,9 +270,14 @@ def main():
     print("XGBOOST OPTIMIZATION PIPELINE FOR pIC50 PREDICTION")
     print("=" * 80)
     
+    
+    schema_parser = argparse.ArgumentParser(description="XGBoost Optimization Pipeline")
+    schema_parser.add_argument('--config', type=str, help='Path to JSON configuration file for Grid Search', default=None)
+    args = schema_parser.parse_args()
+    
     setup_directories()
     
-    # 1. Load Data
+    # ... (rest of loading) ...
     try:
         X, y, df_orig = load_data(INPUT_FILE)
     except FileNotFoundError as e:
@@ -301,8 +299,16 @@ def main():
     print("3. Hyperparameter Optimization (Grid Search)")
     print("-" * 40)
     
+    if args.config:
+        print(f"Loading configuration from: {args.config}")
+        param_grid = load_grid_config(args.config)
+        print("Using Custom/Provided Grid.")
+    else:
+        print("Using DEFAULT (Exhaustive) Grid.")
+        param_grid = DEFAULT_PARAM_GRID
+    
     # Calculate total iterations for progress bar
-    n_candidates = len(ParameterGrid(PARAM_GRID))
+    n_candidates = len(ParameterGrid(param_grid))
     n_splits = 5
     total_fits = n_candidates * n_splits
     
@@ -311,7 +317,7 @@ def main():
 
     grid_search = GridSearchCV(
         estimator=xgb.XGBRegressor(objective='reg:squarederror', random_state=RANDOM_STATE, n_jobs=-1),
-        param_grid=PARAM_GRID,
+        param_grid=param_grid,
         scoring='neg_mean_squared_error',
         cv=n_splits,
         verbose=0,  # Disable verbose output to use tqdm instead

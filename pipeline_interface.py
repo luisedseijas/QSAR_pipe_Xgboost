@@ -20,6 +20,7 @@ import sys
 import glob
 import subprocess
 import time
+import json
 from datetime import datetime
 
 # Try to import rich for beautiful UI, otherwise prompt to install
@@ -227,13 +228,22 @@ def print_status_table(state):
 # ==============================================================================
 # ACTIONS
 # ==============================================================================
-def run_script(script_path, description):
+def run_script(script_path_or_cmd, description):
     """Executes a python script with a nice spinner."""
+    # Determine actual script path for verification
+    if isinstance(script_path_or_cmd, list):
+        script_path = script_path_or_cmd[0]
+        cmd = [sys.executable] + script_path_or_cmd
+    else:
+        script_path = script_path_or_cmd
+        cmd = [sys.executable, script_path]
+
     if not os.path.exists(script_path):
         console.print(f"[red]Error: Script {script_path} not found![/]")
         return False
         
     start_time = time.time()
+
     
     # We use subprocess to run it. 
     # capturing output to show success/fail, but maybe streaming is better if long?
@@ -243,9 +253,14 @@ def run_script(script_path, description):
     
     console.rule(f"[bold cyan]Executing: {description}[/]")
     
+    console.rule(f"[bold cyan]Executing: {description}[/]")
+    
+    
+    # Handle list of arguments (script path + args) - ALREADY DONE ABOVE
+    
     try:
         # Simple run allowing output to flow to terminal so user sees progress bars of the scripts
-        result = subprocess.run([sys.executable, script_path], check=True)
+        result = subprocess.run(cmd, check=True)
         
         duration = time.time() - start_time
         console.print(f"\n[bold green]✓ {description} Completed successfully in {duration:.1f}s[/]")
@@ -256,6 +271,45 @@ def run_script(script_path, description):
     except Exception as e:
         console.print(f"\n[bold red]✕ Unexpected error: {e}[/]")
         return False
+    except Exception as e:
+        console.print(f"\n[bold red]✕ Unexpected error: {e}[/]")
+        return False
+
+def get_step_2_grid_config():
+    """Prompts user for Step 2 Grid Configuration and returns flags."""
+    console.print("\n[bold cyan]Step 2 Configuration: Hyperparameter Grid Search[/]")
+    console.print("  [1] [green]Default (Exhaustive)[/]: Best for final models. [yellow](Time Consuming)[/]")
+    console.print("  [2] [yellow]Fast (Verification)[/]: Best for testing/debugging. [dim](Quick)[/]")
+    console.print("  [3] [blue]Custom (File)[/]: Load from 'grid_config.json'.")
+    
+    choice = Prompt.ask("\nSelect configuration", choices=["1", "2", "3"], default="1")
+    
+    if choice == '1':
+        return [] # No flags = Default
+        
+    elif choice == '2':
+        # Create temporary fast config
+        fast_grid = {
+            'n_estimators': [10], 
+            'max_depth': [3]
+        }
+        fast_config_path = os.path.join(BASE_DIR, 'fast_grid_temp.json')
+        try:
+            with open(fast_config_path, 'w') as f:
+                json.dump(fast_grid, f)
+            return ['--config', fast_config_path]
+        except Exception as e:
+            console.print(f"[red]Error creating fast config: {e}[/]")
+            return []
+            
+    elif choice == '3':
+        custom_path = os.path.join(BASE_DIR, 'src', 'qsar_pipeline', 'grid_config.json')
+        if not os.path.exists(custom_path):
+            console.print(f"[red]Error: Custom file not found at {custom_path}. Using Default.[/]")
+            return []
+        return ['--config', custom_path]
+        
+    return []
 
 # ==============================================================================
 # MAIN LOOP
@@ -290,7 +344,13 @@ def main():
             if state['step_2']['status'] == "BLOCKED":
                 if not Confirm.ask("[yellow]Warning: Step 1 data is missing. Proceed anyway?[/yellow]"):
                     continue
-            run_script(PATHS['script_train'], "XGBoost Training")
+            
+            # Get Config
+            grid_args = get_step_2_grid_config()
+            
+            # Combine script path and args
+            cmd_args = [PATHS['script_train']] + grid_args
+            run_script(cmd_args, "XGBoost Training")
             Prompt.ask("\n[dim]Press Enter to continue...[/]")
             
         elif choice == '3':
@@ -303,8 +363,12 @@ def main():
             
         elif choice.lower() == 'a':
             if Confirm.ask("This will run all 3 steps in sequence. Continue?"):
+                # Ask for Step 2 config upfront
+                grid_args = get_step_2_grid_config()
+                step_2_cmd = [PATHS['script_train']] + grid_args
+                
                 if run_script(PATHS['script_opt'], "Step 1: Optimization"):
-                    if run_script(PATHS['script_train'], "Step 2: Training"):
+                    if run_script(step_2_cmd, "Step 2: Training"):
                         run_script(PATHS['script_pred'], "Step 3: Prediction")
                 Prompt.ask("\n[dim]Press Enter to continue...[/]")
 
