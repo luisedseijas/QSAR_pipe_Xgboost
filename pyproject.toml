@@ -8,7 +8,8 @@ version = "0.1.0"
 description = "A comprehensive QSAR analysis and prediction pipeline."
 readme = "README.md"
 authors = [
-  { name = "Luis E. Seijas/Andres Cervantes", email = "luis.seijas@urosario.edu.co/andres.cervantes@urosario.edu.co" },
+  { name = "Luis E. Seijas", email = "luis.seijas@urosario.edu.co" }, 
+  {name = "Andres Cervantes", email = "andres.cervantes@urosario.edu.co"}
 ]
 license = { file = "LICENSE" }
 classifiers = [

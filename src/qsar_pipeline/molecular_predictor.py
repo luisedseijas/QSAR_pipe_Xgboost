@@ -217,16 +217,35 @@ def train_pca_ad(X_train_scaled, variance_threshold=0.95):
     }
 
 
-def calculate_descriptors(df, smiles_col='smiles'):
+def calculate_descriptors(df, selected_features=None, smiles_col='smiles'):
     """
     Calculates RDKit descriptors for molecules in the DataFrame.
+    If selected_features is provided, only calculates those specific descriptors.
     """
     logger.info("Calculating molecular descriptors using RDKit...")
     
-    # Initialize descriptor calculator with all available RDKit descriptors
-    calc = MoleculeDescriptors.MolecularDescriptorCalculator([x[0] for x in Descriptors._descList])
-    descriptor_names = calc.GetDescriptorNames()
+    # 1. Determine which RDKit descriptors to calculate
+    all_rdkit_descs = [x[0] for x in Descriptors._descList]
     
+    if selected_features:
+        # Intersection of request and available
+        rdkit_desc_names = [d for d in all_rdkit_descs if d in selected_features]
+    else:
+        rdkit_desc_names = all_rdkit_descs
+        
+    # Initialize calculator with specific names
+    calc = MoleculeDescriptors.MolecularDescriptorCalculator(rdkit_desc_names)
+    
+    # 2. Determine which Custom descriptors to calculate
+    # We define the full list and logic mapping here
+    # Keys must match what is used in 'custom_descriptors' below
+    all_custom_names = ['NumN', 'NumBr', 'NumAtoms', 'NumBonds', 'RingCount']
+    
+    if selected_features:
+        custom_names = [d for d in all_custom_names if d in selected_features]
+    else:
+        custom_names = all_custom_names
+        
     descriptors_data = []
     valid_indices = []
     
@@ -237,44 +256,44 @@ def calculate_descriptors(df, smiles_col='smiles'):
             
         mol = Chem.MolFromSmiles(smiles)
         if mol:
-            # Standard Descriptors
+            # Calculate Standard Descriptors
+            # CalcDescriptors returns values in the order of names passed to constructor
             descriptors = list(calc.CalcDescriptors(mol))
             
-            # Custom Counts (to match training data features like NumN, NumBr, NumAtoms)
-            # Note: Training data has both 'NumAtoms' and 'HeavyAtomCount'. 
-            # calculating NumAtoms as total atoms (including H) requires AddHs.
-            mol_with_h = Chem.AddHs(mol)
+            # Calculate Custom Descriptors (Only what's needed)
+            custom_vals = {}
+            if 'NumN' in custom_names: 
+                custom_vals['NumN'] = len([a for a in mol.GetAtoms() if a.GetSymbol() == 'N'])
+            if 'NumBr' in custom_names:
+                custom_vals['NumBr'] = len([a for a in mol.GetAtoms() if a.GetSymbol() == 'Br'])
+            if 'NumAtoms' in custom_names:
+                mol_with_h = Chem.AddHs(mol)
+                custom_vals['NumAtoms'] = mol_with_h.GetNumAtoms()
+            if 'NumBonds' in custom_names:
+                custom_vals['NumBonds'] = mol.GetNumBonds()
+            if 'RingCount' in custom_names:
+                custom_vals['RingCount'] = mol.GetRingInfo().NumRings()
             
-            custom_descriptors = {
-                'NumN': len([a for a in mol.GetAtoms() if a.GetSymbol() == 'N']),
-                'NumBr': len([a for a in mol.GetAtoms() if a.GetSymbol() == 'Br']),
-                'NumAtoms': mol_with_h.GetNumAtoms(), 
-                'NumBonds': mol.GetNumBonds(),
-                'RingCount': mol.GetRingInfo().NumRings()
-            }
-            
-            # Append custom values to descriptor list
-            # We need to extend the descriptor NAMES too, but doing it inside the loop is inefficient for names.
-            # We will handle names outside.
+            # Extract values in the correct order of custom_names
+            custom_values_ordered = [custom_vals[name] for name in custom_names]
             
             # Combine
-            row_values = descriptors + list(custom_descriptors.values())
+            row_values = descriptors + custom_values_ordered
             descriptors_data.append(row_values)
             valid_indices.append(idx)
         else:
             logger.warning(f"Invalid SMILES at index {idx}: {smiles}")
             
-    # Update Descriptor Names
-    custom_names = ['NumN', 'NumBr', 'NumAtoms', 'NumBonds', 'RingCount']
-    all_names = list(descriptor_names) + custom_names
+    # Combined Column Names
+    final_names = rdkit_desc_names + custom_names
     
     # Create DataFrame with descriptors
-    df_desc = pd.DataFrame(descriptors_data, columns=all_names, index=valid_indices)
+    df_desc = pd.DataFrame(descriptors_data, columns=final_names, index=valid_indices)
     
     # Merge back with original data (keeping only valid molecules)
     df_result = df.loc[valid_indices].join(df_desc)
     
-    logger.info(f"Descriptors calculated for {len(df_result)} molecules.")
+    logger.info(f"Descriptors calculated for {len(df_result)} molecules (Features: {len(final_names)}).")
     return df_result
 
 
@@ -287,23 +306,33 @@ def predict_new_compounds():
     logger.info("Starting Molecular Prediction Pipeline...")
     
     # -------------------------------------------------------------------------
-    # 1. Load Data
+    # 1. Load Model & Metadata (MOVED UP)
     # -------------------------------------------------------------------------
-    # Training Data (for scaling & PCA fit)
-    train_file = os.path.join(DATA_DIR, "processed", "dataset_molecular_optimizado.xlsx") # Optimized dataset
+    # We load this FIRST to know which features to calculate
+    model, metadata = load_latest_model_and_metadata(MODEL_DIR)
+    
+    # Identify Selected Features
+    try:
+        selected_features = metadata['features_selected']
+    except KeyError:
+        logger.error("Could not find 'features_selected' in metadata.")
+        return
+
+    logger.info(f"Model uses {len(selected_features)} features.")
+
+    # -------------------------------------------------------------------------
+    # 2. Load Data & Calculate Descriptors
+    # -------------------------------------------------------------------------
+    # Training Data
+    train_file = os.path.join(DATA_DIR, "processed", "dataset_molecular_optimizado.xlsx")
     if not os.path.exists(train_file):
-        # Fallback to the known raw file if optimized one isn't there, but optimized is preferred for consistency
-        # Assuming dataset_optimizer.py generated this. If not, we might need to look for 'all_descriptor_results_1751.xlsx'
-        # Let's assume the user has run the previous steps.
         logger.warning(f"Optimized dataset not found at {train_file}. Checking raw input.")
-        train_file = os.path.join(DATA_DIR, "raw", "all_descriptor_results_1751.xlsx") # Fallback absolute path
+        train_file = os.path.join(DATA_DIR, "raw", "all_descriptor_results_1751.xlsx")
         
     df_train = load_data(train_file)
     
     # New Compounds Data
-    # Filename generic
     input_file = "new_compounds.xlsx"
-    # We look for it in the Documents folder or current dir
     input_path = None
     possible_paths = [
         os.path.join(DATA_DIR, "raw", input_file),
@@ -321,8 +350,7 @@ def predict_new_compounds():
         
     df_new_raw = load_data(input_path)
     
-    # Calculate descriptors if they don't exist
-    # Determine SMILES column
+    # Calculate descriptors (Passing selected_features!)
     smiles_col = None
     for col in ['smiles', 'SMILES', 'Smiles', 'Canonical_Smiles']:
         if col in df_new_raw.columns:
@@ -330,26 +358,11 @@ def predict_new_compounds():
             break
             
     if smiles_col:
-        df_new = calculate_descriptors(df_new_raw, smiles_col=smiles_col)
+        # Optimization: Only calculate needed features
+        df_new = calculate_descriptors(df_new_raw, selected_features=selected_features, smiles_col=smiles_col)
     else:
-        # If no smiles, hopefully descriptors are already there (unlikely given user input)
         logger.warning("No SMILES column found. Assuming descriptors are present in the file.")
         df_new = df_new_raw
-    
-    # -------------------------------------------------------------------------
-    # 2. Load Model & Metadata
-    # -------------------------------------------------------------------------
-    model, metadata = load_latest_model_and_metadata(MODEL_DIR)
-    
-    # Identify Selected Features
-    try:
-        selected_features = metadata['features_selected']
-    except KeyError:
-        # If metadata structure varies, try to infer or fallback
-        logger.error("Could not find 'features_selected' in metadata.")
-        return
-
-    logger.info(f"Model uses {len(selected_features)} features.")
     
     # -------------------------------------------------------------------------
     # 3. Data Preparation
@@ -500,7 +513,7 @@ def predict_new_compounds():
     plt.xlabel('Predicted pIC50')
     plt.ylabel('Count')
     plt.grid(True, linestyle='--', alpha=0.5)
-    plt.savefig(os.path.join(PLOTS_DIR, f"step_3_distribucion_predicciones_{timestamp_str}.png"))
+    plt.savefig(os.path.join(PLOTS_DIR, f"distribucion_predicciones_{timestamp_str}.png"))
     plt.close()
     
     # Plot 2: Mahalanobis Distance vs pIC50 (AD Plot)
@@ -528,7 +541,7 @@ def predict_new_compounds():
     plt.ylabel('Predicted pIC50')
     plt.legend()
     plt.grid(True, linestyle=':', alpha=0.5)
-    plt.savefig(os.path.join(PLOTS_DIR, f"step_3_dominio_aplicabilidad_pca_{timestamp_str}.png"))
+    plt.savefig(os.path.join(PLOTS_DIR, f"dominio_aplicabilidad_pca_{timestamp_str}.png"))
     plt.close()
     
     # Plot 3: Top 200 Candidates Grid Visualization
@@ -551,24 +564,24 @@ def predict_new_compounds():
         # We will split into chunks of 50 to resolve visibility issues or just one big image?
         # A single large image is often hard to read. Let's do top 100 in one image 10x10.
         # User asked for 200. 
-        # Strategy: Save 4 images of 50 molecules each.
+        # Strategy: Save multiple images of 20 molecules each for better resolution.
         
-        chunk_size = 50
+        chunk_size = 20
         for i in range(0, len(top_mols), chunk_size):
             chunk_mols = top_mols[i:i+chunk_size]
             chunk_legends = top_legends[i:i+chunk_size]
             
             img = Draw.MolsToGridImage(
                 chunk_mols, 
-                molsPerRow=5, 
-                subImgSize=(300, 300), 
+                molsPerRow=4, 
+                subImgSize=(600, 600), 
                 legends=chunk_legends,
                 returnPNG=False
             )
             
             # Save
             part_num = (i // chunk_size) + 1
-            img_path = os.path.join(PLOTS_DIR, f"step_3_top_candidatos_part{part_num}_{timestamp_str}.png")
+            img_path = os.path.join(PLOTS_DIR, f"top_candidatos_part{part_num}_{timestamp_str}.png")
             img.save(img_path)
             logger.info(f"Saved visual report part {part_num}: {img_path}")
             
